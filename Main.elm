@@ -3,13 +3,15 @@ import Html exposing (..)
 import Html.Events exposing (onClick)
 import StartApp.Simple as StartApp
 import Signal exposing (Address)
-import Flock exposing (..)
+import Game
 
 -- main = animate steps
 type Screen = Menu | Game | HowTo
 type Action
-  = ChangeScreen Screen
-  | NoOp
+  = NoOp
+  | ChangeScreen Screen
+  | ResetPoints
+  | SetLastPressTime Int
 
 type alias Model =
   { screen: Screen
@@ -17,8 +19,24 @@ type alias Model =
 
 initialModel: Model
 initialModel =
-  { screen = Menu
+  { screen = Menu,
+    lastPressTime = 0,
+    points = 0
   }
+
+update: Action -> Model -> Model
+update action model =
+  case action of
+    NoOp ->
+      model
+    ChangeScreen screen ->
+      {model | screen <- screen}
+    ResetPoints ->
+      {model | points <- 0}
+    SetLastPressTime time ->
+      {model | SetLastPressTime <- time}
+
+
 
 menu: Address Action -> Html
 menu address =
@@ -29,7 +47,7 @@ menu address =
 
 game: Html
 game =
-  flock Top
+  Game.test
 
 --steps = [forward 20, left 90, forward 10, right 78, forward 500]
 view: Address Action -> Model -> Html
@@ -42,13 +60,6 @@ view address model =
     HowTo ->
       text "HowTo"--animate steps
 
-update: Action -> Model -> Model
-update action model =
-  case action of
-    NoOp ->
-      model
-    ChangeScreen screen ->
-      {model | screen <- screen}
 
 main: Signal Html
 main = StartApp.start
