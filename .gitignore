@@ -1,3 +1,5 @@
-*.js
+elm.js
 *.log
 elm-stuff
+build
+node_modules
