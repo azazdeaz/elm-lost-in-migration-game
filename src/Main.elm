@@ -5,11 +5,19 @@ import StartApp.Simple as StartApp
 import Signal exposing (Address)
 import Types exposing (..)
 import Game
+import Time
+import Window
+import Keyboard
+import Graphics.Element exposing (..)
 
 -- main = animate steps
 
+type alias Keys = { x:Int, y:Int }
+
 type alias Model =
   { screen: Screen
+  , lastPressTime: Int
+  , points: Int
   }
 
 initialModel: Model
@@ -42,8 +50,7 @@ menu address =
 
 --steps = [forward 20, left 90, forward 10, right 78, forward 500]
 --view: Address Action -> Model -> Html
-view : (Int, Int) -> Model -> Element
-view (w',h') model =
+view address (w',h') model =
   case model.screen of
     Menu ->
       menu address
@@ -55,14 +62,41 @@ view (w',h') model =
 
 -- SIGNALS
 
-main : Signal Element
+main : Signal Html
 main =
-  Signal.map2 view Window.dimensions (Signal.foldp update mario input)
+  Signal.map2 (view inbox.address) Window.dimensions (Signal.foldp update initialModel input)
 
-
-input : Signal (Float, Keys)
+input : Signal Action
 input =
-  let
-    delta = Signal.map (\t -> t/20) (fps 30)
-  in
-    Signal.sampleOn delta (Signal.map2 (,) delta Keyboard.arrows)
+  Signal.merge answer inbox.signal
+
+inbox : Signal.Mailbox Action
+inbox = Signal.mailbox NoOp
+
+isArrowPressed : Keys -> Bool
+isArrowPressed {x, y} =
+  -- (x /= 0 || y /= 0) && (x == 0 || y == 0)
+  xor (x /= 0) (y /= 0)
+
+keysToAnswer : Keys -> Action
+keysToAnswer {x, y} =
+  case (x, y) of
+    (0, 1) ->
+      AnswerTop
+    (1, 0) ->
+      AnswerRight
+    (0, -1) ->
+      AnswerBottom
+    (-1, 0) ->
+      AnswerLeft
+    _ ->
+      AnswerLeft
+
+
+answer : Signal Action
+answer =
+  Keyboard.arrows
+    |> Signal.filter isArrowPressed
+    |> Signal.map keysToAnswer
+    |> Time.timestamp
+    |> Signal.map (\(time, action) -> action time)
