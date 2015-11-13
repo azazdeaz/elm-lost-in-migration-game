@@ -12,14 +12,6 @@ import Graphics.Element exposing (..)
 
 -- main = animate steps
 
-type alias Keys = { x:Int, y:Int }
-
-type alias Model =
-  { screen: Screen
-  , lastPressTime: Int
-  , points: Int
-  }
-
 initialModel: Model
 initialModel =
   { screen = Menu,
@@ -29,15 +21,26 @@ initialModel =
 
 update: Action -> Model -> Model
 update action model =
-  case action of
-    NoOp ->
-      model
-    ChangeScreen screen ->
-      {model | screen <- screen}
-    ResetPoints ->
-      {model | points <- 0}
-    SetLastPressTime time ->
-      {model | lastPressTime <- time}
+  let
+    setAnswer : Time.Time -> Model
+    setAnswer time =
+      {model | lastPressTime <- round time}
+  in
+    case action of
+      NoOp ->
+        model
+      ChangeScreen screen ->
+        {model | screen <- screen}
+      ResetPoints ->
+        {model | points <- 0}
+      AnswerTop time ->
+        setAnswer time
+      AnswerRight time ->
+        setAnswer time
+      AnswerBottom time ->
+        setAnswer time
+      AnswerLeft time ->
+        setAnswer time
 
 
 
@@ -55,7 +58,7 @@ view address (w',h') model =
     Menu ->
       menu address
     Game ->
-      Game.view address
+      Game.view model
     HowTo ->
       text "HowTo"--animate steps
 
@@ -75,10 +78,9 @@ inbox = Signal.mailbox NoOp
 
 isArrowPressed : Keys -> Bool
 isArrowPressed {x, y} =
-  -- (x /= 0 || y /= 0) && (x == 0 || y == 0)
   xor (x /= 0) (y /= 0)
 
-keysToAnswer : Keys -> Action
+keysToAnswer : Keys -> Time.Time -> Action
 keysToAnswer {x, y} =
   case (x, y) of
     (0, 1) ->
@@ -96,7 +98,7 @@ keysToAnswer {x, y} =
 answer : Signal Action
 answer =
   Keyboard.arrows
-    |> Signal.filter isArrowPressed
+    |> Signal.filter isArrowPressed {x = 1, y = 0}
     |> Signal.map keysToAnswer
     |> Time.timestamp
     |> Signal.map (\(time, action) -> action time)

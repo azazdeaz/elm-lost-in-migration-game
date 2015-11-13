@@ -8,8 +8,7 @@ import Random.Array exposing (sample)
 import Graphics.Element exposing (show)
 import Maybe exposing (withDefault)
 import Bird
-
---▲▼◀▶
+import Types exposing (..)
 
 type Field = Empty | Up | Right | Down | Left
 
@@ -29,10 +28,76 @@ crossForm =
     (I,I,I,I,I)
   )
 
+upForm : MarkupForm
+upForm =
+  (
+    (I,I,I,I,I),
+    (I,I,X,I,I),
+    (I,O,I,O,I),
+    (O,I,I,I,O),
+    (I,I,I,I,I)
+  )
+
+rightForm : MarkupForm
+rightForm =
+  (
+    (I,O,I,I,I),
+    (I,I,O,I,I),
+    (I,I,I,X,I),
+    (I,I,O,I,I),
+    (I,O,I,I,I)
+  )
+
+downForm : MarkupForm
+downForm =
+  (
+    (I,I,I,I,I),
+    (O,I,I,I,O),
+    (I,O,I,O,I),
+    (I,I,X,I,I),
+    (I,I,I,I,I)
+  )
+
+leftForm : MarkupForm
+leftForm =
+  (
+    (I,I,I,O,I),
+    (I,I,O,I,I),
+    (I,X,I,I,I),
+    (I,I,O,I,I),
+    (I,I,I,O,I)
+  )
+
+verticalForm : MarkupForm
+verticalForm =
+  (
+    (I,I,O,I,I),
+    (I,I,O,I,I),
+    (I,I,X,I,I),
+    (I,I,O,I,I),
+    (I,I,O,I,I)
+  )
+
+horisontalForm : MarkupForm
+horisontalForm =
+  (
+    (I,I,I,I,I),
+    (I,I,I,I,I),
+    (O,O,X,O,O),
+    (I,I,I,I,I),
+    (I,I,I,I,I)
+  )
+
 forms : List MarkupForm
 forms =
   [
-    crossForm
+    crossForm,
+    upForm,
+    rightForm,
+    downForm,
+    leftForm,
+    verticalForm,
+    horisontalForm
   ]
 
 markupToField : Markup -> Field -> Field -> Field
@@ -120,6 +185,6 @@ flockView fieldForm =
         (f 0 4 a5), (f 1 4 b5), (f 2 4 c5), (f 3 4 d5), (f 4 4 e5)
       ]
 
-
-main =
-  flockView (getRandomFlock 33)
+view : Model -> Html
+view model =
+  flockView (getRandomFlock model.lastPressTime)
