@@ -1,5 +1,6 @@
 --import Turtle exposing (..)
 import Html exposing (..)
+import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import StartApp.Simple as StartApp
 import Signal exposing (Address)
@@ -47,8 +48,8 @@ update action model =
 menu: Address Action -> Html
 menu address =
   div [] [
-    button [onClick address (ChangeScreen Game)][ text "Game" ],
-    button [onClick address (ChangeScreen HowTo)][ text "How To?" ]
+    node "paper-button" [onClick address (ChangeScreen Game), class "--google-blue-500"] [ text "Game" ],
+    node "paper-button" [onClick address (ChangeScreen HowTo)][ text "How To?" ]
   ]
 
 --steps = [forward 20, left 90, forward 10, right 78, forward 500]
