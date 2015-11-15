@@ -10,7 +10,7 @@ import Maybe exposing (withDefault)
 import Bird
 import Types exposing (..)
 
-type Field = Empty | Up | Right | Down | Left
+type Field = Empty | Direction
 
 type Markup = I | O | X
 type alias MarkupLine = (Markup,Markup,Markup,Markup,Markup)
@@ -128,17 +128,14 @@ markupFormToFieldForm markupForm oField xField =
       (f a5, f b5, f c5, f d5, f e5)
     )
 
-getRandomFlock : Int -> FieldForm
-getRandomFlock time =
+getRandomFlock : Int -> Random.Seed -> Direction
+getRandomFlock seed middleDirection =
   let
-    seed = Random.initialSeed time
     (maybeForm, seed') = (sample seed (Array.fromList forms))
-    ways = Array.fromList [Up, Left, Right, Down]
-    (maybeDirection, seed'') = sample seed' ways
-    (maybeMiddleDirection, seed''') = sample seed'' ways
+    directions = Array.fromList [Up, Left, Right, Down]
+    (maybeDirection, seed'') = sample seed' directions
     form = withDefault crossForm maybeForm
     direction = withDefault Left maybeDirection
-    middleDirection = withDefault Left maybeMiddleDirection
   in
     markupFormToFieldForm form direction middleDirection
 
@@ -187,4 +184,4 @@ flockView fieldForm =
 
 view : Model -> Html
 view model =
-  flockView (getRandomFlock model.lastPressTime)
+  flockView (getRandomFlock model.seed model.goodDirection)

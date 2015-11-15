@@ -8,6 +8,6 @@ import Types exposing (..)
 view : Model -> Html
 view model =
   div [] [
-    text (toString model.lastPressTime),
+    text (toString model.seed),
     Flock.view model
   ]

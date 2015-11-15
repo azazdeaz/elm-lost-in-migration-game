@@ -10,22 +10,40 @@ import Time
 import Window
 import Keyboard
 import Graphics.Element exposing (..)
+import Random
+import Random.Array exposing (sample)
+import Array
+import Maybe exposing (withDefault)
 
 -- main = animate steps
 
 initialModel: Model
 initialModel =
   { screen = Menu,
-    lastPressTime = 0,
+    seed = Random.initialSeed 0,
+    goodDirection = Left,
     points = 0
   }
 
 update: Action -> Model -> Model
 update action model =
   let
-    setAnswer : Time.Time -> Model
-    setAnswer time =
-      {model | lastPressTime <- round time}
+    seed = Random.initialSeed time
+    answers = Array.fromList [Up, Left, Right, Down]
+    (maybeDirection, seed') = sample seed answers
+    direction = withDefault Left maybeDirection
+    nextScore model answerDirection =
+       if model.direction == answerDirection
+         then model.score + 200
+         else model.score
+
+    setAnswer : Direction -> Time.Time -> Model
+    setAnswer answerDirection time =
+      {model |
+        score <- nextScore model answerDirection,
+        seed <- seed',
+        goodDirection <- direction
+      }
   in
     case action of
       NoOp ->
@@ -34,14 +52,8 @@ update action model =
         {model | screen <- screen}
       ResetPoints ->
         {model | points <- 0}
-      AnswerTop time ->
-        setAnswer time
-      AnswerRight time ->
-        setAnswer time
-      AnswerBottom time ->
-        setAnswer time
-      AnswerLeft time ->
-        setAnswer time
+      Answer direction time ->
+        setAnswer direction time
 
 
 
@@ -85,15 +97,15 @@ keysToAnswer : Keys -> Time.Time -> Action
 keysToAnswer {x, y} =
   case (x, y) of
     (0, 1) ->
-      AnswerTop
+      Answer Top
     (1, 0) ->
-      AnswerRight
+      Answer Right
     (0, -1) ->
-      AnswerBottom
+      Answer Bottom
     (-1, 0) ->
-      AnswerLeft
+      Answer Left
     _ ->
-      AnswerLeft
+      Answer Left
 
 
 answer : Signal Action
