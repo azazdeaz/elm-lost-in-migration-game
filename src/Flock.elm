@@ -150,24 +150,31 @@ flockView fieldForm =
       (a5, b5, c5, d5, e5)
     ) = fieldForm
 
+    directionToDegree : Direction -> String
+    directionToDegree direction =
+      case direction of
+        Up
+          -> "-90"
+        Right
+          -> "0"
+        Down
+          -> "90"
+        Left
+          -> "180"
+
+    f : Float -> Float -> Field -> Html
     f x y field =
       let
         rotation =
           case field of
-            Up
-              -> "-90"
-            Right
-              -> "0"
-            Down
-              -> "90"
-            Left
-              -> "180"
             Empty
               -> ""
+            Bird direction
+              -> directionToDegree direction
       in
-        if field == Empty
+        if rotation == ""
         then
-          text ""
+          text rotation
         else
           Bird.bird 21 x y rotation
   in

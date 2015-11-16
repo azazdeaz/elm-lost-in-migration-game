@@ -9,7 +9,7 @@ type alias Model =
   { screen: Screen
   , seed: Random.Seed
   , goodDirection: Direction
-  , points: Int
+  , score: Int
   }
 
 type Screen = Menu | Game | HowTo
@@ -19,5 +19,5 @@ type Direction = Up | Right | Left | Down
 type Action
   = NoOp
   | ChangeScreen Screen
-  | ResetPoints
+  | ResetScore
   | Answer Direction Time

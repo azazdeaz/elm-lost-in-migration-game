@@ -9,7 +9,7 @@ import Game
 import Time
 import Window
 import Keyboard
-import Graphics.Element exposing (..)
+import Graphics.Element exposing (show)
 import Random
 import Random.Array exposing (sample)
 import Array
@@ -22,27 +22,41 @@ initialModel =
   { screen = Menu,
     seed = Random.initialSeed 0,
     goodDirection = Left,
-    points = 0
+    score = 200
   }
 
 update: Action -> Model -> Model
 update action model =
   let
-    seed = Random.initialSeed time
-    answers = Array.fromList [Up, Left, Right, Down]
-    (maybeDirection, seed') = sample seed answers
-    direction = withDefault Left maybeDirection
+    seed : Float -> Random.Seed
+    seed time =
+      Random.initialSeed (round time)
+
+    answers =
+      Array.fromList [Up, Left, Right, Down]
+
+    generateNextDirection : Float -> (Maybe Direction, Random.Seed)
+    generateNextDirection time =
+      sample (seed time) answers
+
+    direction : Float -> Direction
+    direction time =
+      time
+        |> generateNextDirection
+        |> fst
+        |> withDefault Left
+
     nextScore model answerDirection =
-       if model.direction == answerDirection
+       if model.goodDirection == answerDirection
          then model.score + 200
          else model.score
 
-    setAnswer : Direction -> Time.Time -> Model
-    setAnswer answerDirection time =
+    setAnswer : Model -> Direction -> Time.Time -> Model
+    setAnswer model answerDirection time =
       {model |
         score <- nextScore model answerDirection,
-        seed <- seed',
-        goodDirection <- direction
+        seed <- snd (generateNextDirection time),
+        goodDirection <- direction time
       }
   in
     case action of
@@ -50,10 +64,10 @@ update action model =
         model
       ChangeScreen screen ->
         {model | screen <- screen}
-      ResetPoints ->
-        {model | points <- 0}
+      ResetScore ->
+        {model | score <- 0}
       Answer direction time ->
-        setAnswer direction time
+        setAnswer model direction time
 
 
 
@@ -97,11 +111,11 @@ keysToAnswer : Keys -> Time.Time -> Action
 keysToAnswer {x, y} =
   case (x, y) of
     (0, 1) ->
-      Answer Top
+      Answer Up
     (1, 0) ->
       Answer Right
     (0, -1) ->
-      Answer Bottom
+      Answer Down
     (-1, 0) ->
       Answer Left
     _ ->
