@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server",
+    "build-demo": "webpack --config webpack.config.js",
+    "publish-demo": "npm run build-demo && gh-pages --dist build"
   },
   "repository": {
     "type": "git",
@@ -22,6 +24,7 @@
     "elm-simple-loader": "^0.1.1",
     "elm-webpack-loader": "^0.2.0",
     "file-loader": "^0.8.4",
+    "gh-pages": "^0.5.0",
     "webpack": "^1.12.3",
     "webpack-dev-server": "^1.12.1"
   }
