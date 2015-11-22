@@ -8,6 +8,6 @@ import Types exposing (..)
 view : Model -> Html
 view model =
   div [] [
-    text (toString model.seed),
+    text ("Score: " ++ (toString model.score)),
     Flock.view model
   ]
