@@ -21,8 +21,7 @@
   },
   "homepage": "https://github.com/azazdeaz/elm-lost-in-migration-game#readme",
   "devDependencies": {
-    "elm-simple-loader": "^0.1.1",
-    "elm-webpack-loader": "^0.2.0",
+    "elm-simple-loader": "^1.0.0",
     "file-loader": "^0.8.4",
     "gh-pages": "^0.5.0",
     "webpack": "^1.12.3",
