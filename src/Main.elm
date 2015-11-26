@@ -54,18 +54,18 @@ update action model =
     setAnswer : Model -> Direction -> Time.Time -> Model
     setAnswer model answerDirection time =
       {model |
-        score <- nextScore model answerDirection,
-        seed <- snd (generateNextDirection time),
-        goodDirection <- direction time
+        score = nextScore model answerDirection,
+        seed = snd (generateNextDirection time),
+        goodDirection = direction time
       }
   in
     case action of
       NoOp ->
         model
       ChangeScreen screen ->
-        {model | screen <- screen}
+        {model | screen = screen}
       ResetScore ->
-        {model | score <- 0}
+        {model | score = 0}
       Answer direction time ->
         setAnswer model direction time
 
