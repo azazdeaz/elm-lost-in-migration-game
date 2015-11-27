@@ -10,7 +10,7 @@ module.exports = {
   module: {
     loaders: [
       {
-        test: /\.elm/,
+        test: /\.elm$/,
         loader: 'elm-simple-loader',
         include: path.join(__dirname, 'src'),
         exclude: /node_modules/
@@ -19,6 +19,7 @@ module.exports = {
         include: path.join(__dirname, 'src'),
         loader: 'file?name=[name].[ext]'
       }
-    ]
+    ],
+    noParse: [/.elm$/]
   }
 }
