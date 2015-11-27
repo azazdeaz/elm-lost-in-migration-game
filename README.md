@@ -8,6 +8,6 @@ Rewrite of the Lumosity game with the same name in Elm (Just for learning Elm)
 ```sh
 $ npm install
 $ elm package install
-$ bower install
+$ bower install #not mandatory
 $ npm start
 ```
