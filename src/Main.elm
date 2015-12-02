@@ -1,15 +1,12 @@
 --import Turtle exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
-import StartApp.Simple as StartApp
 import Signal exposing (Address)
 import Types exposing (..)
 import Game
 import Time
-import Window
 import Keyboard
-import Graphics.Element exposing (show)
 import Random
 import Random.Array exposing (sample)
 import Array
@@ -19,10 +16,13 @@ import Maybe exposing (withDefault)
 
 initialModel: Model
 initialModel =
-  { screen = Menu,
-    seed = Random.initialSeed 0,
-    goodDirection = Left,
-    score = 200
+  { screen = Menu
+  , seed = Random.initialSeed 0
+  , goodDirection = Left
+  , score = 200
+  , gameElapsedTime = 0
+  , gameWidth = 600
+  , gameHeight = 400
   }
 
 update: Action -> Model -> Model
@@ -62,8 +62,16 @@ update action model =
     case action of
       NoOp ->
         model
+      Tick delta->
+        if model.screen == Game then
+          {model | gameElapsedTime = model.gameElapsedTime + delta}
+        else
+          model
       ChangeScreen screen ->
-        {model | screen = screen}
+        {model |
+          screen = screen,
+          gameElapsedTime = if screen == Game then 0 else model.gameElapsedTime
+        }
       ResetScore ->
         {model | score = 0}
       Answer direction time ->
@@ -78,27 +86,48 @@ menu address =
     node "paper-button" [onClick address (ChangeScreen HowTo)][ text "How To?" ]
   ]
 
+frame : Model -> Html -> Html
+frame model content =
+  div [
+    style
+      [ ("width", (toString model.gameWidth) ++ "px")
+      , ("height", (toString model.gameHeight) ++ "px")
+      , ("background-color", "#7FDBFF")
+      , ("poistion", "absolute")
+      ]
+  ]
+  [ content ]
+
 --steps = [forward 20, left 90, forward 10, right 78, forward 500]
---view: Address Action -> Model -> Html
-view address (w',h') model =
-  case model.screen of
-    Menu ->
-      menu address
-    Game ->
-      Game.view model
-    HowTo ->
-      text "HowTo"--animate steps
+view : Address Action -> Model -> Html
+view address model =
+  let
+    content =
+      case model.screen of
+        Menu ->
+          menu address
+        Game ->
+          Game.view model
+        HowTo ->
+          text "HowTo"--animate steps
+  in
+    frame model content
 
 
 -- SIGNALS
 
 main : Signal Html
 main =
-  Signal.map2 (view inbox.address) Window.dimensions (Signal.foldp update initialModel input)
+  Signal.map (view inbox.address) (Signal.foldp update initialModel input)
 
 input : Signal Action
 input =
-  Signal.merge answer inbox.signal
+  Signal.mergeMany [answer, inbox.signal, tick]
+
+tick : Signal Action
+tick =
+  Time.fps 60
+    |> Signal.map (\delta -> Tick delta)
 
 inbox : Signal.Mailbox Action
 inbox = Signal.mailbox NoOp

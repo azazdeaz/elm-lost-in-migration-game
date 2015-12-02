@@ -4,10 +4,17 @@ import Graphics.Element exposing (show)
 import Flock
 import Html exposing (..)
 import Types exposing (..)
+import Time exposing (second)
+import Basics exposing (truncate)
 
 view : Model -> Html
 view model =
-  div [] [
-    text ("Score: " ++ (toString model.score)),
-    Flock.view model
-  ]
+  let
+    time =
+      truncate (model.gameElapsedTime / second)
+  in
+    div [] [
+      text ("Score: " ++ (toString model.score)),
+      text ("Time: " ++ (toString time)),
+      Flock.view model
+    ]
