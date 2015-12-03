@@ -128,7 +128,7 @@ markupFormToFieldForm markupForm oField xField =
       (f a5, f b5, f c5, f d5, f e5)
     )
 
-getRandomFlock : Random.Seed -> Direction -> FieldForm
+getRandomFlock : Random.Seed -> Direction -> (FieldForm, Random.Seed)
 getRandomFlock seed middleDirection =
   let
     (maybeForm, seed') = (sample seed (Array.fromList forms))
@@ -136,11 +136,13 @@ getRandomFlock seed middleDirection =
     (maybeDirection, seed'') = sample seed' directions
     form = withDefault crossForm maybeForm
     direction = withDefault Left maybeDirection
+    fieldForm =
+      markupFormToFieldForm form (Bird direction) (Bird middleDirection)
   in
-    markupFormToFieldForm form (Bird direction) (Bird middleDirection)
+    (fieldForm, seed'')
 
-flockView : FieldForm -> Html
-flockView fieldForm =
+flockView : FieldForm -> Random.Seed -> Int -> Int -> Html
+flockView fieldForm seed width height =
   let
     (
       (a1, b1, c1, d1, e1),
@@ -177,10 +179,15 @@ flockView fieldForm =
           text rotation
         else
           Bird.bird 21 x y rotation
+
+    (left, seed') = Random.generate (Random.int 12 (width - 120)) seed
+    (top, seed'') = Random.generate (Random.int 34 (height - 120)) seed
   in
     div
       [ style
         [ ("position", "absolute")
+        , ("left", (toString left) ++ "px")
+        , ("top", (toString top) ++ "px")
         ]
       ]
       [ (f 0 0 a1), (f 1 0 b1), (f 2 0 c1), (f 3 0 d1), (f 4 0 e1),
@@ -192,4 +199,8 @@ flockView fieldForm =
 
 view : Model -> Html
 view model =
-  flockView (getRandomFlock model.seed model.goodDirection)
+  let
+    (flock, seed) =
+      getRandomFlock model.seed model.goodDirection
+  in
+    flockView flock seed model.gameWidth model.gameHeight
