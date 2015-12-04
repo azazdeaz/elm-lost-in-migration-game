@@ -1,6 +1,6 @@
 --import Turtle exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (class, style)
+import Html.Attributes exposing (class, style, attribute)
 import Html.Events exposing (onClick)
 import Signal exposing (Address)
 import Types exposing (..)
@@ -58,15 +58,27 @@ update action model =
         seed = snd (generateNextDirection time),
         goodDirection = direction time
       }
+
+    increaseGameElapsedTime delta model =
+      if model.screen == Game then
+        {model | gameElapsedTime = model.gameElapsedTime + delta}
+      else
+        model
+
+    checkGameEnd model =
+      if model.gameElapsedTime >= Time.second * 12 then
+        {model | screen = Menu}
+      else
+        model
+
   in
     case action of
       NoOp ->
         model
       Tick delta->
-        if model.screen == Game then
-          {model | gameElapsedTime = model.gameElapsedTime + delta}
-        else
-          model
+        model
+          |> increaseGameElapsedTime delta
+          |> checkGameEnd
       ChangeScreen screen ->
         {model |
           screen = screen,
@@ -82,8 +94,16 @@ update action model =
 menu: Address Action -> Html
 menu address =
   div [] [
-    node "paper-button" [onClick address (ChangeScreen Game), class "--google-blue-500"] [ text "Game" ],
-    node "paper-button" [onClick address (ChangeScreen HowTo)][ text "How To?" ]
+    node "paper-button"
+      [ onClick address (ChangeScreen Game)
+      , attribute "raised" "true"
+      ]
+      [ text "Game" ],
+    node "paper-button"
+      [ onClick address (ChangeScreen HowTo)
+      ,  attribute "raised" "true"
+      ]
+      [ text "How To?" ]
   ]
 
 frame : Model -> Html -> Html
